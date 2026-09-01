@@ -61,10 +61,17 @@ public class ApiV1PostController {
     @PostMapping
     @Transactional
     public RsData<PostDto> write(
-            @Valid @RequestBody PostWriteReqBody reqBody
+            @Valid @RequestBody PostWriteReqBody reqBody,
+            @RequestParam String username,
+            @RequestParam String password
     ) {
 
-        Member actor = memberService.findByUsername("user1").get();
+        Member actor = memberService.findByUsername(username).get();
+
+        if (!actor.getPassword().equals(password)) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+
         Post post = postService.write(actor, reqBody.title, reqBody.content);
         return new RsData<>(
                 "201-1",
