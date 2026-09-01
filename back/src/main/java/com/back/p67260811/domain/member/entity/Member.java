@@ -1,19 +1,21 @@
 package com.back.p67260811.domain.member.entity;
 
 import com.back.p67260811.global.jpa.entity.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
+
+import java.util.UUID;
 
 @Entity
 @Getter
 public class Member extends BaseEntity {
 
+    @Column(unique = true)
     private String username;
     private String password;
     private String nickname;
+    @Column(unique = true)
+    private String apiKey;
 
     protected Member() {
     }
@@ -22,6 +24,7 @@ public class Member extends BaseEntity {
         this.username = username;
         this.password = password;
         this.nickname = nickname;
+        this.apiKey = UUID.randomUUID().toString();
     }
 
 }
