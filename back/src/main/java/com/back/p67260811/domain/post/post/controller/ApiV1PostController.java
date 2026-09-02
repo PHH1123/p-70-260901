@@ -64,8 +64,9 @@ public class ApiV1PostController {
     @Transactional
     public RsData<PostDto> write(
             @Valid @RequestBody PostWriteReqBody reqBody,
-            @RequestParam String apiKey
+            @RequestHeader(name = "Authorization") String apiKey
     ) {
+        apiKey = apiKey.split(" ")[1];
 
         Member actor = memberService.findByApiKey(apiKey).orElseThrow(() -> new ServiceException("401-1", "API 키가 올바르지 않습니다."));
         Post post = postService.write(actor, reqBody.title, reqBody.content);
