@@ -68,9 +68,10 @@ public class ApiV1PostController {
     ) {
         apiKey = apiKey.split(" ")[1];
 
-        Member actor = memberService.findByApiKey(apiKey).orElseThrow(() -> new ServiceException("401-1", "API 키가 올바르지 않습니다."));
+        Member actor = memberService.findByApiKey(apiKey).orElseThrow(() ->
+                new ServiceException("401-1", "API 키가 올바르지 않습니다."));
         Post post = postService.write(actor, reqBody.title, reqBody.content);
-        
+
         return new RsData<>(
                 "201-1",
                 "%d번 글이 성공적으로 등록되었습니다".formatted(post.getId()),
@@ -93,9 +94,20 @@ public class ApiV1PostController {
     @Transactional
     public RsData<Void> modify(
             @PathVariable int id,
-            @Valid @RequestBody PostModifyReqBody reqBody
+            @Valid @RequestBody PostModifyReqBody reqBody,
+            @RequestHeader(name = "Authorization") String apiKey
     ) {
+
+        apiKey = apiKey.split(" ")[1];
+
+        Member actor = memberService.findByApiKey(apiKey).orElseThrow(() ->
+                new ServiceException("401-1", "API 키가 올바르지 않습니다."));
+
         Post post = postService.findById(id).get();
+        if (!actor.equals(post.getAuthor())) {
+            throw new ServiceException("403-1", "수정할 권한이 없습니다.");
+        }
+
         postService.modify(post, reqBody.title, reqBody.content);
 
         return new RsData<>(
