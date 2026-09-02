@@ -72,6 +72,7 @@ public class ApiV1PostControllerTest {
                 .perform(
                         post("/api/v1/posts")
                                 .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer user1")
                                 .content("""
                                         {
                                             "title": "%s",
