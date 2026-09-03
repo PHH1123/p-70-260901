@@ -2,6 +2,7 @@ package com.back.p67260811.domain.post.post.entity;
 
 import com.back.p67260811.domain.member.entity.Member;
 import com.back.p67260811.domain.post.comment.entity.PostComment;
+import com.back.p67260811.global.exception.ServiceException;
 import com.back.p67260811.global.jpa.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -65,5 +66,17 @@ public class Post extends BaseEntity {
         // 비즈니스 규칙
         this.title = title;
         this.content = content;
+    }
+
+    public void checkActorModify(Member actor) {
+        if (!this.author.equals(actor)) {
+            throw new ServiceException("403-1", "수정할 권한이 없습니다.");
+        }
+    }
+
+    public void checkActorDelete(Member actor) {
+        if (!this.author.equals(actor)) {
+            throw new ServiceException("403-1", "삭제 권한이 없습니다.");
+        }
     }
 }
