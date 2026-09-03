@@ -77,8 +77,7 @@ public class ApiV1MemberController {
 
     @PostMapping("/login")
     public RsData<MemberDto> login(
-            @RequestBody @Valid LoginReqBody reqBody,
-            HttpServletResponse response
+            @RequestBody @Valid LoginReqBody reqBody
     ) {
         // 1. 회원 존재 여부
         Member actor = memberService.findByUsername(reqBody.username).orElseThrow(
@@ -90,9 +89,7 @@ public class ApiV1MemberController {
             throw new ServiceException("401-2", "비밀번호가 일치하지 않습니다.");
         }
 
-        response.addCookie(new Cookie(
-                "apiKey", actor.getApiKey()
-        ));
+        rq.addCookie("apiKey", actor.getApiKey());
 
         // 3. 비밀 번호가 맞으면 인증 데이터 제공
         return new RsData(
