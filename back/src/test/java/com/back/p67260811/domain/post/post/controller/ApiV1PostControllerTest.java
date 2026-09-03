@@ -1,5 +1,7 @@
 package com.back.p67260811.domain.post.post.controller;
 
+import com.back.p67260811.domain.member.entity.Member;
+import com.back.p67260811.domain.member.repository.MemberRepository;
 import com.back.p67260811.domain.post.post.entity.Post;
 import com.back.p67260811.domain.post.post.repository.PostRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -32,6 +34,9 @@ public class ApiV1PostControllerTest {
 
     @Autowired
     private PostRepository postRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Test
     @DisplayName("글 다건 조회")
@@ -97,6 +102,95 @@ public class ApiV1PostControllerTest {
                 .andExpect(jsonPath("$.data.username").value("user1"));
 
 
+    }
+
+    @Test
+    @DisplayName("글 작성, 인증 헤더 정보가 없을 때")
+    void t2_1() throws Exception {
+        String title = "제목입니다";
+        String content = "내용입니다";
+
+        Member author = memberRepository.findByUsername("user1").get();
+
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/api/v1/posts")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "title": "%s",
+                                            "content": "%s"
+                                        }
+                                        """.formatted(title, content))
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1PostController.class))
+                .andExpect(handler().methodName("write"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.resultCode").value("401-1"))
+                .andExpect(jsonPath("$.msg").value("헤더에 인증 정보가 없습니다."));
+    }
+
+    @Test
+    @DisplayName("글 작성, 올바르지 않은 헤더 형식")
+    void t2_2() throws Exception {
+        String title = "제목입니다";
+        String content = "내용입니다";
+
+        Member author = memberRepository.findByUsername("user1").get();
+
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/api/v1/posts")
+                                .header("Authorization", "wrong %s".formatted(author.getApiKey()))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "title": "%s",
+                                            "content": "%s"
+                                        }
+                                        """.formatted(title, content))
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1PostController.class))
+                .andExpect(handler().methodName("write"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.resultCode").value("401-2"))
+                .andExpect(jsonPath("$.msg").value("헤더의 인증 정보 형식이 올바르지 않습니다."));
+    }
+
+    @Test
+    @DisplayName("글 작성, 잘못된/없는 API 키")
+    void t2_3() throws Exception {
+        String title = "제목입니다";
+        String content = "내용입니다";
+
+        Member author = memberRepository.findByUsername("user1").get();
+
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/api/v1/posts")
+                                .header("Authorization", "Bearer %s".formatted(author.getApiKey() + "2"))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "title": "%s",
+                                            "content": "%s"
+                                        }
+                                        """.formatted(title, content))
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1PostController.class))
+                .andExpect(handler().methodName("write"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.resultCode").value("401-3"))
+                .andExpect(jsonPath("$.msg").value("API 키가 올바르지 않습니다."));
     }
 
     @Test
