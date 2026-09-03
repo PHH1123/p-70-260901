@@ -58,4 +58,14 @@ public class Rq {
         cookie.setHttpOnly(true);
         response.addCookie(cookie);
     }
+
+    public void deleteCookie(String name) {
+        Cookie cookie = new Cookie(name, "");
+        cookie.setDomain("localhost");
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(0);
+
+        response.addCookie(cookie);
+    }
 }
