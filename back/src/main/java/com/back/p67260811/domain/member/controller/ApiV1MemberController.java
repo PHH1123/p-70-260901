@@ -6,6 +6,9 @@ import com.back.p67260811.domain.member.service.MemberService;
 import com.back.p67260811.global.dto.RsData;
 import com.back.p67260811.global.exception.ServiceException;
 import com.back.p67260811.global.rq.Rq;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -74,7 +77,8 @@ public class ApiV1MemberController {
 
     @PostMapping("/login")
     public RsData<MemberDto> login(
-            @RequestBody @Valid LoginReqBody reqBody
+            @RequestBody @Valid LoginReqBody reqBody,
+            HttpServletResponse response
     ) {
         // 1. 회원 존재 여부
         Member actor = memberService.findByUsername(reqBody.username).orElseThrow(
@@ -85,6 +89,10 @@ public class ApiV1MemberController {
         if (!actor.getPassword().equals(reqBody.password)) {
             throw new ServiceException("401-2", "비밀번호가 일치하지 않습니다.");
         }
+
+        response.addCookie(new Cookie(
+                "apiKey", actor.getApiKey()
+        ));
 
         // 3. 비밀 번호가 맞으면 인증 데이터 제공
         return new RsData(
