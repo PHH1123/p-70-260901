@@ -6,6 +6,7 @@ import com.back.p67260811.standard.ut.Ut;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,8 +26,9 @@ class AuthTokenServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
-    // 토근 만료 기간: 10분
-    private final long expireMillis = 1000L * 60 * 10;
+    @Value("${custom.jwt.expireMillis}")
+    private long expireMillis;
+    @Value("${custom.jwt.secretPattern}")
     private final String secretPattern = "abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890";
 
     @Test
