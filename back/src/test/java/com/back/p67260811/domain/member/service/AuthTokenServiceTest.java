@@ -32,7 +32,7 @@ class AuthTokenServiceTest {
 
     // 토근 만료 기간: 10분
     private final long expireMillis = 1000L * 60 * 10;
-    private final String secretPattern= "abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890";
+    private final String secretPattern = "abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890";
 
     @Test
     @DisplayName("authTokenService 서비스가 존재한다.")
@@ -50,12 +50,24 @@ class AuthTokenServiceTest {
         Date issuedAt = new Date();
         Date expiration = new Date(issuedAt.getTime() + expireMillis);
 
+        Map<String, Object> payload = Map.of("name", "Paul", "age", 23);
+
         String jwt = Jwts.builder()
-                .claims(Map.of("name", "Paul", "age", 23))
+                .claims(payload)
                 .issuedAt(issuedAt)
                 .expiration(expiration)
                 .signWith(secretKey)
                 .compact();
+
+        Map<String, Object> parsedPayload = (Map<String, Object>) Jwts
+                .parser()
+                .verifyWith(secretKey)
+                .build()
+                .parse(jwt)
+                .getPayload();
+
+        assertThat(parsedPayload)
+                .containsAllEntriesOf(payload);
 
         assertThat(jwt).isNotBlank();
 

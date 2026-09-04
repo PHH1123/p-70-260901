@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class Ut {
     public static class jwt {
-        public static String toString(String secret, long expireSeconds, Map<String, Object> body) {
+        public static String toString(String secret, long expireMillis, Map<String, Object> body) {
             ClaimsBuilder claimsBuilder = Jwts.claims();
 
             for (Map.Entry<String, Object> entry : body.entrySet()) {
@@ -21,7 +21,7 @@ public class Ut {
             Claims claims = claimsBuilder.build();
 
             Date issuedAt = new Date();
-            Date expiration = new Date(issuedAt.getTime() + 1000L * expireSeconds);
+            Date expiration = new Date(issuedAt.getTime() + expireMillis);
 
             Key secretKey = Keys.hmacShaKeyFor(secret.getBytes());
 
