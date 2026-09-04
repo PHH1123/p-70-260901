@@ -127,6 +127,7 @@ public class ApiV1MemberControllerTest {
                 .andExpect(jsonPath("$.resultCode").value("200-1"))
                 .andExpect(jsonPath("$.msg").value("%s님 반갑습니다!".formatted(member.getNickname())))
                 .andExpect(jsonPath("$.data.apiKey").exists())
+                .andExpect(jsonPath("$.data.accessToken").isNotEmpty())
                 .andExpect(jsonPath("$.data.memberDto.id").value(member.getId()))
                 .andExpect(jsonPath("$.data.memberDto.createDate").exists())
                 .andExpect(jsonPath("$.data.memberDto.modifyDate").exists())
@@ -146,6 +147,13 @@ public class ApiV1MemberControllerTest {
                     if(apiKeyCookie != null) {
                         assertThat(apiKeyCookie.getValue()).isNotBlank();
                     }
+
+                    Cookie accessTokenCookie = result.getResponse().getCookie("accessToken");
+                    assertThat(accessTokenCookie).isNotNull();
+
+                    assertThat(accessTokenCookie.getPath()).isEqualTo("/");
+                    assertThat(accessTokenCookie.getDomain()).isEqualTo("localhost");
+                    assertThat(accessTokenCookie.isHttpOnly()).isEqualTo(true);
                 }
         );
     }

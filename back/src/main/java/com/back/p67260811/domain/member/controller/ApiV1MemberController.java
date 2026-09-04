@@ -2,10 +2,12 @@ package com.back.p67260811.domain.member.controller;
 
 import com.back.p67260811.domain.member.dto.MemberDto;
 import com.back.p67260811.domain.member.entity.Member;
+import com.back.p67260811.domain.member.service.AuthTokenService;
 import com.back.p67260811.domain.member.service.MemberService;
 import com.back.p67260811.global.dto.RsData;
 import com.back.p67260811.global.exception.ServiceException;
 import com.back.p67260811.global.rq.Rq;
+import com.back.p67260811.standard.ut.Ut;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class ApiV1MemberController {
 
     private final MemberService memberService;
+    private final AuthTokenService authTokenService;
     private final Rq rq;
 
     record JoinReqBody(
@@ -70,7 +73,8 @@ public class ApiV1MemberController {
 
     record LoginResBody(
             MemberDto memberDto,
-            String apiKey
+            String apiKey,
+            String accessToken
     ) {
     }
 
@@ -88,7 +92,9 @@ public class ApiV1MemberController {
             throw new ServiceException("401-2", "비밀번호가 일치하지 않습니다.");
         }
 
+        String accessToken = memberService.genAccessToken(actor);
         rq.addCookie("apiKey", actor.getApiKey());
+        rq.addCookie("accessToken", accessToken);
 
         // 3. 비밀 번호가 맞으면 인증 데이터 제공
         return new RsData(
@@ -96,7 +102,9 @@ public class ApiV1MemberController {
                 "%s님 반갑습니다!".formatted(actor.getNickname()),
                 new LoginResBody(
                         new MemberDto(actor),
-                        actor.getApiKey()
+                        actor.getApiKey(),
+                        accessToken
+
                 )
         );
     }
